@@ -58,3 +58,7 @@ def results(champ_num):
     champ = Championship.load_champ(champ_num)
     result = champ.get_result()
     return render_template("results.html", champ=champ, result=result)
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
