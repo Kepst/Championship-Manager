@@ -31,8 +31,8 @@ def create_champ():
 @app.route("/championship/<champ_num>")
 def championships(champ_num):
     champ = Championship.load_champ(champ_num)
-    if not champ:
-        return render_template("current_championship.html")
+    if champ is None:
+        return redirect("/championship")
     if (champ.pairings == []):
         return render_template("finished_championship.html", champ = champ)
     return render_template("current_championship.html", champ = champ)
