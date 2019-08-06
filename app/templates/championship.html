@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<a href="new_champ">Create new championship</a>
+<hr>
+{% for game in championships %}
+<a href="championship\{{game.number}}">{{game.name}}</a>
+{% endfor %}
+{% endblock %}

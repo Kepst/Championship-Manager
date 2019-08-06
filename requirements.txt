@@ -1,0 +1,6 @@
+Flask==1.1.1
+Flask-WTF==0.14.2
+gunicorn==19.9.0
+Jinja2==2.10.1
+networkx==2.3
+WTForms==2.2.1

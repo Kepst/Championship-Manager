@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row">
+    <div class="column left">
+        {% for round in champ.results %}
+        <h1>Round {{round}}</h1>
+        {% for match in champ.results[round] %}
+        <div>{{match[2][0]}} <b>{{match[0]}}</b> vs <b>{{match[1]}}</b> {{match[2][1]}}</div>
+
+        {% endfor %}
+        {% endfor %}
+    </div>
+    <div class="column right">
+        {% for player, score in result %}
+        <p>{{player}} score: {{score}}</p>
+        {%  endfor %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,18 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/styles.css') }}">
+</head>
+
+<body>
+    <ul>
+        <li><a href="/index">Home</a></li>
+        <li><a href="/championship">Championships</a></li>
+        <li><a href="/login">Login</a></li>
+    </ul>
+    Presentation on the 13th 15:15
+    <hr>
+    {% block content %}{% endblock %}
+</body>
+
+</html>

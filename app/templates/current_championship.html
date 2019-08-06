@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+Round: {{champ.round}}
+<form action="/process_champ/{{champ.champ_id}}" method="POST">
+{% for match in champ.pairings %}
+
+<input type="number" name="player_{{match[0]}}" value={{range(1,3)|random}} required> <b>{{match[0]}}</b> vs <b>{{match[1]}}</b> <input type="number" name="player_{{match[1]}}" value={{range(1,3)|random}} required>
+<br>
+
+{% endfor %}
+<input type="submit" value="Next Round">
+</form>
+
+<a href="/championship/{{champ.champ_id}}/results">Results</a>
+
+{% endblock %}
