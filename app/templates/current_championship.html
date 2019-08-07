@@ -2,7 +2,9 @@
 
 {% block content %}
 
+Championship: {{champ.name}}
 Round: {{champ.round}}
+
 <form action="/process_champ/{{champ.champ_id}}" method="POST">
 {% for match in champ.pairings %}
 

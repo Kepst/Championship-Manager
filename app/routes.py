@@ -1,7 +1,7 @@
 import Championship
 
 from flask import render_template, request, redirect, session
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 from app import app
 
 
@@ -13,8 +13,7 @@ def index():
 
 @app.route("/championship")
 def championship():
-    game = [{"name": "Example", "number": 1}]
-    # TODO: get available championships for the user
+    game = Championship.getChamps(session["user_id"])
     return render_template("championship.html", championships=game)
 
 
@@ -26,11 +25,12 @@ def new_champ():
 @app.route("/create_champ", methods=["POST"])
 def create_champ():
     if session.get("logged"):
-        champ, champ_id = Championship.createChamp(request.form["type"])
-        for num in range((len(request.form)-1)//2):
-            champ.add_player(
-                request.form["player_"+str(num)], request.form["num_"+str(num)])
+        champ, champ_id = Championship.createChamp(
+            request.form["type"], session["user_id"])
+        for num in range(len(request.form)-2):
+            champ.add_player(request.form["player_"+str(num)])
         champ.next_round()
+        champ.name = request.form["name"]
         Championship.save_champ(champ)
         return redirect("/championship/"+str(champ_id))
     return redirect("/championship/")
@@ -77,15 +77,25 @@ def login():
     else:
         name = request.values.get("name")
         password = request.values.get("password")
+        user_id = Championship.loginUser(name, password)
+        if user_id is None:
+            pass
+        else:
+            session["user_id"] = user_id
+            session["logged"] = True
+            return redirect("/championship")
         return render_template("login.html")
+
 
 @app.route("/create_acc", methods=["POST"])
 def create_acc():
-    user = Championship.createUser(request.values.get("name"), generate_password_hash(request.values.get("password")), request.values.get("email"))
+    user = Championship.createUser(request.values.get("name"), generate_password_hash(
+        request.values.get("password")), request.values.get("email"))
     if user is not None:
         session["user_id"] = user[0]
         session["logged"] = True
     return redirect("/championship")
+
 
 @app.route("/logout")
 def logout():

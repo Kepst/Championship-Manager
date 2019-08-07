@@ -7,6 +7,8 @@ from collections import defaultdict
 import pickle
 import sqlite3
 
+from werkzeug.security import check_password_hash
+
 class Championship(metaclass=ABCMeta):
     def __init__(self, win_points=3, draw_points=1, lose_points=0):
         self.player_num = 0
@@ -22,6 +24,7 @@ class Championship(metaclass=ABCMeta):
         self.lose_points = lose_points
         self.champ_id = 0
         self.finished = False
+        self.name = ""
 
     def add_player(self, player, number=None):
         """
@@ -138,6 +141,9 @@ class Swiss(Championship):
 def createDB():
     conn = sqlite3.connect("champ.db")
     c = conn.cursor()
+    c.execute("DROP TABLE IF EXISTS players")
+    c.execute("DROP TABLE IF EXISTS champs")
+    
     c.execute("CREATE TABLE IF NOT EXISTS players (player_id INTEGER PRIMARY KEY AUTOINCREMENT, player_name TEXT NOT NULL, password TEXT NOT NULL, email TEXT)")
     c.execute("CREATE TABLE IF NOT EXISTS champs (champ_id INTEGER PRIMARY KEY AUTOINCREMENT, champ_type TEXT NOT NULL, champ_data BLOB NOT NULL, owner INTEGER, FOREIGN KEY(owner) REFERENCES players(player_id))")
     conn.commit()
@@ -167,7 +173,7 @@ def load_champ(champ_id):
     if data is None:
         return None
     
-    champ_id, champ_type, champ_data = data
+    champ_id, champ_type, champ_data, _ = data
     conn.close()
 
     champ_data = pickle.loads(champ_data)
@@ -180,7 +186,7 @@ def load_champ(champ_id):
         champ.__dict__ = champ_data
     return champ
 
-def createChamp(champ_type:str):
+def createChamp(champ_type:str, user_id:int):
     if champ_type == "Swiss":
         champ = Swiss()
     elif champ_type == "SingleElimination":
@@ -190,7 +196,7 @@ def createChamp(champ_type:str):
     c = conn.cursor()
 
     champ_data = pickle.dumps(champ.__dict__)
-    c.execute("INSERT INTO champs (champ_type, champ_data) VALUES (?, ?)", (champ_type, champ_data))
+    c.execute("INSERT INTO champs (champ_type, champ_data, owner) VALUES (?, ?, ?)", (champ_type, champ_data, user_id))
     champ_id = c.lastrowid
     champ.champ_id = champ_id
     conn.commit()
@@ -201,10 +207,38 @@ def createChamp(champ_type:str):
 def createUser(name, password, email):
     conn = sqlite3.connect("champ.db")
     c = conn.cursor()
+    c.execute("SELECT * FROM players WHERE player_name=?", (name))
+    result = c.fetchone()
+    if result is not None:
+        return None
     c.execute("INSERT INTO players (player_name, password, email) VALUES (?, ?, ?)", (name, password, email))
     conn.commit()
     c.execute("SELECT * FROM players WHERE player_id=?", (c.lastrowid,))
     result = c.fetchone()
+    conn.close()
+    return result
+
+def loginUser(name, password):
+    conn = sqlite3.connect("champ.db")
+    c = conn.cursor()
+    conn.commit()
+    c.execute("SELECT * FROM players WHERE player_name=?", (name))
+    result = c.fetchone()
+    if result is None:
+        return result
+    if check_password_hash(result[2], password):
+        result = result[0]
+    else:
+        result = None
+    conn.close()
+    return result
+
+def getChamps(user_id):
+    conn = sqlite3.connect("champ.db")
+    c = conn.cursor()
+    conn.commit()
+    c.execute("SELECT * FROM champs WHERE owner=?", (user_id,))
+    result = c.fetchall()
     conn.close()
     return result
 
