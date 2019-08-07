@@ -11,7 +11,6 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/championships")
 @app.route("/championship")
 def championship():
     game = [{"name": "Example", "number": 1}]
@@ -26,13 +25,15 @@ def new_champ():
 
 @app.route("/create_champ", methods=["POST"])
 def create_champ():
-    champ, champ_id = Championship.createChamp(request.form["type"])
-    for num in range((len(request.form)-1)//2):
-        champ.add_player(
-            request.form["player_"+str(num)], request.form["num_"+str(num)])
-    champ.next_round()
-    Championship.save_champ(champ)
-    return redirect("/championship/"+str(champ_id))
+    if session.get("logged"):
+        champ, champ_id = Championship.createChamp(request.form["type"])
+        for num in range((len(request.form)-1)//2):
+            champ.add_player(
+                request.form["player_"+str(num)], request.form["num_"+str(num)])
+        champ.next_round()
+        Championship.save_champ(champ)
+        return redirect("/championship/"+str(champ_id))
+    return redirect("/championship/")
 
 
 @app.route("/championship/<champ_num>")
@@ -76,12 +77,18 @@ def login():
     else:
         name = request.values.get("name")
         password = request.values.get("password")
-        print(name, password)
         return render_template("login.html")
 
 @app.route("/create_acc", methods=["POST"])
 def create_acc():
-    user = Championship.createUser(request.values.get("name"), request.values.get("password"), request.values.get("email"))
+    user = Championship.createUser(request.values.get("name"), generate_password_hash(request.values.get("password")), request.values.get("email"))
     if user is not None:
         session["user_id"] = user[0]
+        session["logged"] = True
     return redirect("/championship")
+
+@app.route("/logout")
+def logout():
+    session["user_id"] = None
+    session["logged"] = False
+    return redirect("/login")

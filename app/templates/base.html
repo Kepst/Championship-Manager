@@ -8,7 +8,12 @@
     <ul>
         <li><a href="/index">Home</a></li>
         <li><a href="/championship">Championships</a></li>
+        {% if session.get("logged") %}
+        <li><a href="/logout">Logout</a></li>
+        {% else %}
         <li><a href="/login">Login</a></li>
+        {% endif %}
+        
     </ul>
     Presentation on the 13th 15:15
     <hr>
