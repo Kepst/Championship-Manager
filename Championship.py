@@ -138,7 +138,10 @@ class Swiss(Championship):
 def createDB():
     conn = sqlite3.connect("champ.db")
     c = conn.cursor()
-    c.execute("CREATE TABLE IF NOT EXISTS champs (champ_id INTEGER PRIMARY KEY AUTOINCREMENT, champ_type TEXT NOT NULL, champ_data BLOB NOT NULL)")
+    c.execute("DROP TABLE IF EXISTS champs")
+    c.execute("DROP TABLE IF EXISTS players")
+    c.execute("CREATE TABLE IF NOT EXISTS players (player_id INTEGER PRIMARY KEY AUTOINCREMENT, player_name TEXT NOT NULL, password TEXT NOT NULL, email TEXT)")
+    c.execute("CREATE TABLE IF NOT EXISTS champs (champ_id INTEGER PRIMARY KEY AUTOINCREMENT, champ_type TEXT NOT NULL, champ_data BLOB NOT NULL, owner INTEGER, FOREIGN KEY(owner) REFERENCES players(player_id))")
     conn.commit()
     conn.close()
 
@@ -196,5 +199,15 @@ def createChamp(champ_type:str):
     conn.close()
     
     return champ, champ_id
+
+def createUser(name, password, email):
+    conn = sqlite3.connect("champ.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO players (player_name, password, email) VALUES (?, ?, ?)", (name, password, email))
+    conn.commit()
+    c.execute("SELECT * FROM players WHERE player_id=?", (c.lastrowid,))
+    result = c.fetchone()
+    conn.close()
+    return result
 
 createDB()
