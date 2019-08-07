@@ -13,8 +13,7 @@ def index():
 
 @app.route("/championship")
 def championship():
-    game = Championship.getChamps(session["user_id"])
-    print(game)
+    game = Championship.getChamps(session.get("user_id"))
     return render_template("championship.html", championships=game)
 
 
@@ -27,7 +26,7 @@ def new_champ():
 def create_champ():
     if session.get("logged"):
         champ, champ_id = Championship.createChamp(
-            request.form["type"], request.form["name"], session["user_id"])
+            request.form["type"], request.form["name"], session.get("user_id"))
         for num in range(len(request.form)-2):
             champ.add_player(request.form["player_"+str(num)])
         champ.next_round()
