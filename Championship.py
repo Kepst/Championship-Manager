@@ -140,12 +140,12 @@ class Swiss(Championship):
 
 def createDB():
     conn = sqlite3.connect("champ.db")
-    c = conn.cursor()
-    c.execute("DROP TABLE IF EXISTS players")
-    c.execute("DROP TABLE IF EXISTS champs")
-    
+    c = conn.cursor()    
+    #c.execute("DROP TABLE IF EXISTS players")
+    #c.execute("DROP TABLE IF EXISTS champs")
+
     c.execute("CREATE TABLE IF NOT EXISTS players (player_id INTEGER PRIMARY KEY AUTOINCREMENT, player_name TEXT NOT NULL, password TEXT NOT NULL, email TEXT)")
-    c.execute("CREATE TABLE IF NOT EXISTS champs (champ_id INTEGER PRIMARY KEY AUTOINCREMENT, champ_type TEXT NOT NULL, champ_data BLOB NOT NULL, owner INTEGER, FOREIGN KEY(owner) REFERENCES players(player_id))")
+    c.execute("CREATE TABLE IF NOT EXISTS champs (champ_id INTEGER PRIMARY KEY AUTOINCREMENT, champ_type TEXT NOT NULL, champ_data BLOB NOT NULL, name TEXT, owner INTEGER, FOREIGN KEY(owner) REFERENCES players(player_id))")
     conn.commit()
     conn.close()
 
@@ -172,8 +172,7 @@ def load_champ(champ_id):
     data = c.fetchone()
     if data is None:
         return None
-    
-    champ_id, champ_type, champ_data, _ = data
+    champ_id, champ_type, champ_data, _, _ = data
     conn.close()
 
     champ_data = pickle.loads(champ_data)
@@ -186,7 +185,7 @@ def load_champ(champ_id):
         champ.__dict__ = champ_data
     return champ
 
-def createChamp(champ_type:str, user_id:int):
+def createChamp(champ_type:str, name:str, user_id:int):
     if champ_type == "Swiss":
         champ = Swiss()
     elif champ_type == "SingleElimination":
@@ -196,7 +195,7 @@ def createChamp(champ_type:str, user_id:int):
     c = conn.cursor()
 
     champ_data = pickle.dumps(champ.__dict__)
-    c.execute("INSERT INTO champs (champ_type, champ_data, owner) VALUES (?, ?, ?)", (champ_type, champ_data, user_id))
+    c.execute("INSERT INTO champs (champ_type, champ_data, name, owner) VALUES (?, ?, ?, ?)", (champ_type, champ_data, name, user_id))
     champ_id = c.lastrowid
     champ.champ_id = champ_id
     conn.commit()
@@ -239,6 +238,10 @@ def getChamps(user_id):
     conn.commit()
     c.execute("SELECT * FROM champs WHERE owner=?", (user_id,))
     result = c.fetchall()
+    champs = []
+    for champ in result:
+        champs.append
+    print(result)
     conn.close()
     return result
 

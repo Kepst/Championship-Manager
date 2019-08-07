@@ -3,7 +3,8 @@
 {% block content %}
 <a href="new_champ">Create new championship</a>
 <hr>
+Your championships:<br>
 {% for game in championships %}
-<a href="championship\{{game.number}}">{{game.name}}</a>
+<a href="championship\{{game[0]}}">{{game[3]}}</a><br>
 {% endfor %}
 {% endblock %}
