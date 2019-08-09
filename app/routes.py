@@ -48,6 +48,11 @@ def championships(champ_num):
 
 @app.route("/process_champ/<champ_num>", methods=["POST"])
 def process_champs(champ_num):
+    for champ in Championship.getChamps(session.get("user_id")):
+        if session.get("user_id") == champ[4]:
+            break
+    else:
+        return redirect("/championship/"+champ_num)
     champ = Championship.load_champ(champ_num)
     if not champ:
         return redirect("/championship/"+champ_num)

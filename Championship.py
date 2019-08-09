@@ -141,8 +141,8 @@ class Swiss(Championship):
 def createDB():
     conn = sqlite3.connect("champ.db")
     c = conn.cursor()    
-    c.execute("DROP TABLE IF EXISTS players")
-    c.execute("DROP TABLE IF EXISTS champs")
+    #c.execute("DROP TABLE IF EXISTS players")
+    #c.execute("DROP TABLE IF EXISTS champs")
 
     c.execute("CREATE TABLE IF NOT EXISTS players (player_id INTEGER PRIMARY KEY AUTOINCREMENT, player_name TEXT NOT NULL, password TEXT NOT NULL, email TEXT)")
     c.execute("CREATE TABLE IF NOT EXISTS champs (champ_id INTEGER PRIMARY KEY AUTOINCREMENT, champ_type TEXT NOT NULL, champ_data BLOB NOT NULL, name TEXT, owner INTEGER, FOREIGN KEY(owner) REFERENCES players(player_id))")
@@ -206,7 +206,7 @@ def createChamp(champ_type:str, name:str, user_id:int):
 def createUser(name, password, email):
     conn = sqlite3.connect("champ.db")
     c = conn.cursor()
-    c.execute("SELECT * FROM players WHERE player_name=?", (name))
+    c.execute("SELECT * FROM players WHERE player_name=?", (name,))
     result = c.fetchone()
     if result is not None:
         return None
@@ -221,7 +221,7 @@ def loginUser(name, password):
     conn = sqlite3.connect("champ.db")
     c = conn.cursor()
     conn.commit()
-    c.execute("SELECT * FROM players WHERE player_name=?", (name))
+    c.execute("SELECT * FROM players WHERE player_name=?", (name,))
     result = c.fetchone()
     if result is None:
         return result
